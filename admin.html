@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitudes recibidas | Tiendas D2</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .tabla-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    th, td { padding: .6rem .75rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: var(--green-tint); color: var(--green-deep); white-space: nowrap; }
+    .vacio { padding: 1rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="container" style="padding-block: 2rem;">
+    <div class="panel">
+      <h2>Solicitudes recibidas</h2>
+      <p class="required-note">Datos guardados en la base de datos SQLite. <a href="/">Volver al formulario</a></p>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Tipo</th><th>Mensaje</th><th>Adjunto</th></tr>
+          </thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+      <p class="vacio" id="vacio" hidden>Aún no hay solicitudes.</p>
+    </div>
+  </div>
+
+  <script>
+    (async function () {
+      const filas = document.getElementById('filas');
+      const vacio = document.getElementById('vacio');
+      try {
+        const res = await fetch('/api/solicitudes');
+        const datos = await res.json();
+        vacio.hidden = datos.length > 0;
+        datos.forEach(function (s) {
+          const tr = document.createElement('tr');
+          [s.id, s.creado_en, s.nombre, s.email, s.telefono, s.tipo, s.mensaje, s.adjunto_nombre || '-'].forEach(function (valor) {
+            const td = document.createElement('td');
+            td.textContent = valor;
+            tr.appendChild(td);
+          });
+          filas.appendChild(tr);
+        });
+      } catch (e) {
+        vacio.textContent = 'No se pudo conectar con el servidor.';
+        vacio.hidden = false;
+      }
+    })();
+  </script>
+</body>
+</html>
